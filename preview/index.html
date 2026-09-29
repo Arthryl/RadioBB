@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Radio BB – Beskidzkie brzmienia (Aplikacja Mobilna)</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0B2436">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="../assets/icons/play_store_512.png">
+</head>
+<body>
+
+  <!-- Tryb przełączania ramy telefonu (na komputerze) -->
+  <div class="desktop-banner">
+    <div class="banner-content">
+      <span class="badge-present">PREZENT DLA DARIUSZA MOSKAŁY</span>
+      <strong>Radio BB – Podgląd Aplikacji Mobilnej Android</strong>
+      <span class="banner-hint">Możesz słuchać na żywo, testować ramówkę, wiadomości i wyłącznik czasowy.</span>
+    </div>
+    <div class="banner-actions">
+      <button id="toggle-frame-btn" class="banner-btn">Przełącz ramkę telefonu</button>
+      <button id="copy-stream-btn" class="banner-btn outline">Kopiuj link strumienia</button>
+    </div>
+  </div>
+
+  <div class="device-wrapper">
+    <div class="device-phone" id="phone-container">
+      
+      <!-- Pasek statusu Androida -->
+      <div class="status-bar">
+        <span class="status-time" id="clock-display">12:00</span>
+        <div class="status-notch">
+          <div class="notch-camera"></div>
+        </div>
+        <div class="status-icons">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+          <svg width="16" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+        </div>
+      </div>
+
+      <!-- Ekran Aplikacji -->
+      <div class="app-viewport">
+
+        <!-- ZAKŁADKA 1: ODTWARZACZ (SŁUCHAJ) -->
+        <section id="tab-player" class="tab-page active">
+          <!-- Top bar -->
+          <div class="app-header">
+            <div class="brand-group">
+              <img src="../assets/images/radio-bb-logo.png" alt="Radio BB" class="brand-logo">
+              <div class="brand-text">
+                <span class="brand-name">RADIO BB</span>
+                <span class="brand-tag">Beskidzkie brzmienia</span>
+              </div>
+            </div>
+            <div class="live-pill" id="live-indicator">
+              <span class="live-dot"></span>
+              <span class="live-label">NA ŻYWO</span>
+            </div>
+          </div>
+
+          <!-- Karta z grafiką słuchawek -->
+          <div class="artwork-container">
+            <div class="artwork-card">
+              <img src="../assets/images/beskidzkie-brzmienia.png" alt="Beskidzkie Brzmienia" class="artwork-img">
+              <div class="artwork-overlay">
+                <span class="artwork-location">BIELSKO-BIAŁA</span>
+                <span class="artwork-freq">RADIO INTERNETOWE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wizualizer Grani Beskidów -->
+          <div class="mountain-canvas-wrap">
+            <canvas id="mountainCanvas" width="340" height="50"></canvas>
+          </div>
+
+          <!-- Informacje o audycji i utworze -->
+          <div class="track-info-wrap">
+            <div class="show-badge" id="current-show-badge">Ładowanie ramówki...</div>
+            <h2 class="track-title" id="now-playing-title">Radio BB – Włącz dobre brzmienie</h2>
+            <p class="track-artist" id="now-playing-artist">Beskidzka Grupa Medialna</p>
+          </div>
+
+          <!-- Kontrola głośności -->
+          <div class="volume-container">
+            <button id="mute-btn" class="vol-btn" aria-label="Wycisz">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H3v6h3l5 4z"/><path id="vol-waves" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
+            </button>
+            <input type="range" id="volume-slider" min="0" max="100" value="80" class="vol-slider">
+            <span class="vol-text" id="volume-val">80%</span>
+          </div>
+
+          <!-- Przycisk Play / Pause -->
+          <div class="play-section">
+            <button id="main-play-btn" class="big-play-btn" aria-label="Odtwórz / Pauza">
+              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              <div class="spinner-buffering" id="buffering-spinner" style="display:none;"></div>
+            </button>
+          </div>
+
+          <!-- Dolny pasek pomocniczy: Sleep Timer, Jakość, Share -->
+          <div class="player-footer-tools">
+            <button id="sleep-timer-trigger" class="tool-chip">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span id="sleep-btn-text">Sleep</span>
+            </button>
+
+            <div class="quality-chip">
+              <span class="eq-icon">|||</span>
+              <span>128 kbps · STEREO</span>
+            </div>
+
+            <button id="share-radio-btn" class="tool-chip">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              <span>Poleć</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ZAKŁADKA 2: RAMÓWKA -->
+        <section id="tab-schedule" class="tab-page">
+          <div class="page-header">
+            <h1>Ramówka tygodniowa</h1>
+            <p>Radio BB · Beskidzkie brzmienia</p>
+          </div>
+
+          <div class="schedule-days-bar" id="schedule-days-bar">
+            <!-- Pigułki dni generowane z JS -->
+          </div>
+
+          <div class="hourly-news-card">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <strong>Dzieje się w Beskidach</strong>
+              <p>Wiadomości o każdej pełnej godzinie (00–23)</p>
+            </div>
+          </div>
+
+          <div class="schedule-list" id="schedule-list">
+            <!-- Lista audycji generowana z JS -->
+          </div>
+        </section>
+
+        <!-- ZAKŁADKA 3: WIADOMOŚCI -->
+        <section id="tab-news" class="tab-page">
+          <div class="page-header">
+            <h1>Wiadomości z regionu</h1>
+            <p>Dostarcza Beskidzka24.pl</p>
+          </div>
+
+          <div class="news-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/></svg>
+            <span>Najświeższe relacje z Bielska-Białej, Żywca i Cieszyna</span>
+          </div>
+
+          <div class="news-list" id="news-container">
+            <div class="loading-state">
+              <div class="spinner-small"></div>
+              <span>Pobieranie wiadomości...</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ZAKŁADKA 4: GRUPA BGM -->
+        <section id="tab-group" class="tab-page">
+          <div class="page-header">
+            <h1>Beskidzka Grupa Medialna</h1>
+            <p>Razem wiemy więcej</p>
+          </div>
+
+          <div class="group-hero-card">
+            <span class="hero-eyebrow">WYDAWCA REGIONALNY</span>
+            <h3>Siła mediów Podbeskidzia</h3>
+            <p>Radio BB stanowi integralną część Beskidzkiej Grupy Medialnej. Łączymy rzetelność dziennikarską prasy, zasięg telewizji internetowej oraz dynamikę radia cyfrowego.</p>
+          </div>
+
+          <div class="media-cards-grid">
+            <a href="https://kronika.beskidzka.pl" target="_blank" class="media-link-card">
+              <div class="media-card-top">
+                <span class="media-badge">TYGODNIK</span>
+                <span class="arrow-ext">↗</span>
+              </div>
+              <img src="../assets/images/kronika-beskidzka.svg" alt="Kronika Beskidzka" class="media-card-svg">
+              <p>Kultowy tygodnik lokalny z wieloletnią tradycją.</p>
+            </a>
+
+            <a href="https://beskidzka24.pl" target="_blank" class="media-link-card">
+              <div class="media-card-top">
+                <span class="media-badge">PORTAL</span>
+                <span class="arrow-ext">↗</span>
+              </div>
+              <img src="../assets/images/beskidzka24.svg" alt="Beskidzka24" class="media-card-svg">
+              <p>Największy portal informacyjny Podbeskidzia.</p>
+            </a>
+
+            <a href="https://bielsko.biala.pl/tv" target="_blank" class="media-link-card">
+              <div class="media-card-top">
+                <span class="media-badge">TELEWIZJA</span>
+                <span class="arrow-ext">↗</span>
+              </div>
+              <img src="../assets/images/beskidzka-tv.svg" alt="Beskidzka TV" class="media-card-svg">
+              <p>Materiały wideo, relacje i transmisje live.</p>
+            </a>
+
+            <a href="https://bielsko.biala.pl" target="_blank" class="media-link-card">
+              <div class="media-card-top">
+                <span class="media-badge">MIEJSKI</span>
+                <span class="arrow-ext">↗</span>
+              </div>
+              <img src="../assets/images/bielsko-biala.svg" alt="Bielsko.Biala.pl" class="media-card-svg">
+              <p>Aktualności z życia stolicy Podbeskidzia.</p>
+            </a>
+
+            <a href="https://gzc.cieszyn.pl" target="_blank" class="media-link-card">
+              <div class="media-card-top">
+                <span class="media-badge">ŚLĄSK CIESZYŃSKI</span>
+                <span class="arrow-ext">↗</span>
+              </div>
+              <img src="../assets/images/glos-ziemi-cieszynskiej.svg" alt="Głos Ziemi Cieszyńskiej" class="media-card-svg">
+              <p>Zasłużony tytuł prasowy Ziemi Cieszyńskiej.</p>
+            </a>
+          </div>
+        </section>
+
+        <!-- ZAKŁADKA 5: KONTAKT I DEDYKACJA -->
+        <section id="tab-contact" class="tab-page">
+          <div class="page-header">
+            <h1>Kontakt & Studio</h1>
+            <p>Radio BB · Bielsko-Biała</p>
+          </div>
+
+          <!-- Specjalna karta dedykacji -->
+          <div class="tribute-card">
+            <div class="tribute-badge">PREZENT DLA WŁAŚCICIELA</div>
+            <h3>Dariusz Moskała</h3>
+            <p class="tribute-role">Właściciel Radia BB i Beskidzkiej Grupy Medialnej</p>
+            <p class="tribute-text">Ta aplikacja została stworzona z myślą o słuchaczach Radia BB, by ulubiona rozgłośnia była zawsze pod ręką – w samochodzie, pracy i domu.</p>
+          </div>
+
+          <div class="contact-box">
+            <h3>Studio emisyjne</h3>
+            <a href="https://radiobb.pl" target="_blank" class="contact-row">
+              <span class="c-icon">🌐</span>
+              <div class="c-info">
+                <span class="c-label">Strona WWW</span>
+                <span class="c-val">radiobb.pl</span>
+              </div>
+              <span class="c-arrow">›</span>
+            </a>
+
+            <a href="mailto:redakcja@radiobb.pl" class="contact-row">
+              <span class="c-icon">✉️</span>
+              <div class="c-info">
+                <span class="c-label">Redakcja</span>
+                <span class="c-val">redakcja@radiobb.pl</span>
+              </div>
+              <span class="c-arrow">›</span>
+            </a>
+
+            <a href="https://maps.google.com/?q=Bielsko-Bia%C5%82a" target="_blank" class="contact-row">
+              <span class="c-icon">📍</span>
+              <div class="c-info">
+                <span class="c-label">Siedziba</span>
+                <span class="c-val">Bielsko-Biała, Beskidy</span>
+              </div>
+              <span class="c-arrow">›</span>
+            </a>
+          </div>
+
+          <div class="tech-spec-box">
+            <h4>Parametry techniczne</h4>
+            <div class="tech-row"><span>Strumień audio</span><strong>Shoutcast 128 kbps</strong></div>
+            <div class="tech-row"><span>Częstotliwość</span><strong>44.1 kHz Stereo</strong></div>
+            <div class="tech-row"><span>Silnik mobilny</span><strong>Flutter / ExoPlayer</strong></div>
+            <div class="tech-row"><span>Tryb w tle</span><strong>Foreground MediaService</strong></div>
+          </div>
+        </section>
+
+        <!-- Pływający mini-player gdy jesteśmy poza zakładką Słuchaj -->
+        <div id="mini-player" class="mini-player" style="display:none;">
+          <img src="../assets/images/radio-bb-logo.png" alt="Radio BB" class="mini-logo">
+          <div class="mini-meta">
+            <span class="mini-title" id="mini-title">Radio BB</span>
+            <span class="mini-status" id="mini-status">Na żywo</span>
+          </div>
+          <button id="mini-play-btn" class="mini-play-btn">
+            <svg class="mini-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="mini-icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Dolny pasek nawigacji (5 zakładek) -->
+      <nav class="bottom-nav">
+        <button class="nav-tab active" data-tab="tab-player">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+          <span>Słuchaj</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-schedule">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Ramówka</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-news">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+          <span>Wiadomości</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-group">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span>Grupa BGM</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-contact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Kontakt</span>
+        </button>
+      </nav>
+
+      <!-- Modal Sleep Timer -->
+      <div id="sleep-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+          <div class="modal-bar"></div>
+          <div class="modal-header">
+            <h3>Wyłącznik czasowy</h3>
+            <p>Aplikacja samoczynnie zatrzyma audycję</p>
+          </div>
+          <div id="sleep-active-box" class="sleep-active-box" style="display:none;">
+            <span>Aktywny: wyłączenie za <strong id="sleep-min-left">0</strong> min</span>
+            <button id="cancel-sleep-btn" class="cancel-timer-btn">Anuluj</button>
+          </div>
+          <div class="timer-chips-grid">
+            <button class="timer-chip" data-time="15">15 min</button>
+            <button class="timer-chip" data-time="30">30 min</button>
+            <button class="timer-chip" data-time="45">45 min</button>
+            <button class="timer-chip" data-time="60">60 min</button>
+            <button class="timer-chip" data-time="90">90 min</button>
+          </div>
+          <button id="close-sleep-modal" class="close-modal-btn">Zamknij</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Ukryty odtwarzacz audio HTML5 -->
+  <audio id="radio-audio" preload="none">
+    <source src="https://s3.slotex.pl/shoutcast/7010/stream?sid=1" type="audio/mpeg">
+    <source src="https://s3.slotex.pl:7010/stream/1/?sid=1" type="audio/mpeg">
+  </audio>
+
+  <script src="app.js"></script>
+</body>
+</html>

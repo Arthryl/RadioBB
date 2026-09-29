@@ -1,0 +1,49 @@
+name: Build RadioBB Android Release (APK & AAB)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK & App Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Build Google Play App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RadioBB-Release-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload Google Play AAB Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: RadioBB-GooglePlay-AAB
+          path: build/app/outputs/bundle/release/app-release.aab
