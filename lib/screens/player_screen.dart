@@ -304,7 +304,13 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
       builder: (context, snapshot) {
         final item = snapshot.data;
         final title = item?.title ?? 'Radio BB – Włącz dobre brzmienie';
+        final artist = item?.artist ?? 'Radio BB';
         final currentProg = ScheduleData.getCurrentOrNextProgramme();
+
+        final hasDistinctArtist = isPlaying &&
+            artist.isNotEmpty &&
+            artist.toLowerCase() != 'radio bb' &&
+            artist.toLowerCase() != 'beskidzkie brzmienia';
 
         return Column(
           children: [
@@ -329,28 +335,101 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                 ),
               ),
             ],
-            Text(
-              isBuffering
-                  ? 'Łączenie ze studiem Radia BB...'
-                  : (isPlaying ? title : 'Dotknij Play, aby włączyć radio'),
-              textAlign: TextAlign.center,
-              style: GoogleFonts.manrope(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.paperWhite,
-                height: 1.3,
+            if (isBuffering) ...[
+              Text(
+                'Łączenie ze studiem Radia BB...',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.paperWhite,
+                ),
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              isPlaying ? 'Beskidzka Grupa Medialna · Bielsko-Biała' : 'Beskidzkie brzmienia',
-              style: GoogleFonts.manrope(
-                fontSize: 12.5,
-                color: AppTheme.textMuted,
+            ] else if (!isPlaying) ...[
+              Text(
+                'Dotknij Play, aby włączyć radio',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.paperWhite,
+                ),
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                'Beskidzkie brzmienia na żywo',
+                style: GoogleFonts.manrope(
+                  fontSize: 12.5,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+            ] else if (hasDistinctArtist) ...[
+              // Dedykowana, wyróżniona linia dla WYKONAWCY
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.music_note_rounded, size: 16, color: AppTheme.bluePrimary),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      artist.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                        color: AppTheme.blueSoft,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              // TYTUŁ UTWORU
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.paperWhite,
+                  height: 1.25,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Beskidzka Grupa Medialna · Bielsko-Biała',
+                style: GoogleFonts.manrope(
+                  fontSize: 11.5,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+            ] else ...[
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.paperWhite,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Beskidzka Grupa Medialna · Bielsko-Biała',
+                style: GoogleFonts.manrope(
+                  fontSize: 12.5,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+            ],
           ],
         );
       },

@@ -7,11 +7,20 @@ class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
 
   Future<void> _launch(String schemeUrl) async {
-    final uri = Uri.parse(schemeUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      final uri = Uri.parse(schemeUrl.trim());
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+    } catch (_) {
+      try {
+        final uri = Uri.parse(schemeUrl.trim());
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } catch (_) {}
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -9,21 +9,43 @@ class RadioApiService {
   static const String newsFeedUrl = 'https://beskidzka24.pl/feed/';
   static const String streamUrl = 'https://s3.slotex.pl/shoutcast/7010/stream?sid=1';
 
-  /// Pobiera aktualnie odtwarzany utwór lub audycję z oficjalnego API RadioBB
+  /// Pobiera aktualnie odtwarzany utwór lub audycję z oficjalnego API RadioBB lub serwera Shoutcast
   Future<NowPlayingInfo> fetchNowPlaying() async {
+    // 1. Główne API Radia BB (WordPress)
     try {
       final response = await http.get(
         Uri.parse(metadataUrl),
-        headers: {'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 7));
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 14) RadioBB/1.0',
+        },
+      ).timeout(const Duration(seconds: 4));
 
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes));
-        return NowPlayingInfo.fromJson(data);
+        final title = data['title'] as String?;
+        if (title != null && title.trim().isNotEmpty) {
+          return NowPlayingInfo.fromString(title);
+        }
       }
-    } catch (_) {
-      // Fallback w razie chwilowego braku zasięgu
-    }
+    } catch (_) {}
+
+    // 2. Bezpośrednie zapytanie do serwera strumieniowego Slotex Shoutcast
+    try {
+      final slotexResponse = await http.get(
+        Uri.parse('http://s3.slotex.pl:7010/stats?sid=1&json=1'),
+        headers: {'User-Agent': 'Mozilla/5.0 RadioBB/1.0'},
+      ).timeout(const Duration(seconds: 4));
+
+      if (slotexResponse.statusCode == 200) {
+        final data = json.decode(utf8.decode(slotexResponse.bodyBytes));
+        final songtitle = data['songtitle'] as String?;
+        if (songtitle != null && songtitle.trim().isNotEmpty) {
+          return NowPlayingInfo.fromString(songtitle);
+        }
+      }
+    } catch (_) {}
+
     return NowPlayingInfo.initial();
   }
 
@@ -32,7 +54,7 @@ class RadioApiService {
     try {
       final response = await http.get(
         Uri.parse(newsFeedUrl),
-        headers: {'User-Agent': 'RadioBB-Android/1.0'},
+        headers: {'User-Agent': 'Mozilla/5.0 (Linux; Android 14) RadioBB-News/1.0'},
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -40,8 +62,9 @@ class RadioApiService {
         final items = document.findAllElements('item');
 
         return items.map((node) {
-          final title = node.findElements('title').firstOrNull?.innerText ?? '';
-          final link = node.findElements('link').firstOrNull?.innerText ?? '';
+          final title = node.findElements('title').firstOrNull?.innerText.trim() ?? '';
+          final link = node.findElements('link').firstOrNull?.innerText.trim() ?? '';
+
           final pubDate = node.findElements('pubDate').firstOrNull?.innerText ?? '';
           var description = node.findElements('description').firstOrNull?.innerText ?? '';
 

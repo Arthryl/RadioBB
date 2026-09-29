@@ -105,7 +105,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return StreamBuilder<MediaItem?>(
       stream: widget.audioHandler.mediaItem,
       builder: (context, snapshot) {
-        final title = snapshot.data?.title ?? 'Radio BB';
+        final item = snapshot.data;
+        final title = item?.title ?? 'Radio BB';
+        final artist = item?.artist ?? 'Radio BB';
+        final hasDistinctArtist = isPlaying &&
+            artist.isNotEmpty &&
+            artist.toLowerCase() != 'radio bb' &&
+            artist.toLowerCase() != 'beskidzkie brzmienia';
+
+        final subtitle = hasDistinctArtist
+            ? '$artist · Na żywo'
+            : (isPlaying ? 'Nadaje na żywo' : 'Zatrzymano');
 
         return GestureDetector(
           onTap: () {
@@ -150,16 +160,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        isPlaying ? 'Nadaje na żywo' : 'Zatrzymano',
+                        subtitle,
                         style: GoogleFonts.jetBrainsMono(
                           fontSize: 11,
                           color: isPlaying ? AppTheme.amberAccent : AppTheme.textMuted,
                           fontWeight: FontWeight.w600,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
+
                 IconButton(
                   icon: Icon(
                     isPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_filled_rounded,

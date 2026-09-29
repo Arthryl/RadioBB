@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import '../models/programme_model.dart';
 import 'radio_api_service.dart';
 
 class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
@@ -20,6 +21,8 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   RadioAudioHandler() {
     _initAudioSession();
     _listenPlayerStates();
+    _listenIcyMetadata();
+    _startMetadataPolling();
   }
 
   void _initAudioSession() {
@@ -28,10 +31,19 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
         id: streamUrl,
         album: 'Beskidzka Grupa Medialna',
         title: 'Radio BB – Włącz dobre brzmienie',
-        artist: 'Beskidzkie brzmienia',
+        artist: 'Radio BB',
         artUri: Uri.parse('https://radiobb.pl/wp-content/themes/radio-bb/assets/images/radio-bb-logo.png'),
       ),
     );
+  }
+
+  void _listenIcyMetadata() {
+    _player.icyMetadataStream.listen((IcyMetadata? icy) {
+      final streamTitle = icy?.info?.title;
+      if (streamTitle != null && streamTitle.trim().isNotEmpty) {
+        _applyNewTrackInfo(NowPlayingInfo.fromString(streamTitle));
+      }
+    });
   }
 
   void _listenPlayerStates() {
@@ -142,7 +154,7 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   void _startMetadataPolling() {
     _updateMetadata();
     _metadataTimer?.cancel();
-    _metadataTimer = Timer.periodic(const Duration(seconds: 12), (_) {
+    _metadataTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _updateMetadata();
     });
   }
@@ -154,13 +166,19 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> _updateMetadata() async {
     final info = await _apiService.fetchNowPlaying();
-    final currentItem = mediaItem.value;
+    _applyNewTrackInfo(info);
+  }
 
-    if (currentItem != null && currentItem.title != info.title) {
+  void _applyNewTrackInfo(NowPlayingInfo info) {
+    final currentItem = mediaItem.value;
+    if (currentItem == null) return;
+
+    if (currentItem.title != info.songTitle || currentItem.artist != info.artist) {
       mediaItem.add(
         currentItem.copyWith(
-          title: info.title.isNotEmpty ? info.title : 'Radio BB – Beskidzkie brzmienia',
-          artist: 'Radio BB · Na Żywo',
+          title: info.songTitle,
+          artist: info.artist,
+          album: 'Radio BB · Bielsko-Biała',
         ),
       );
     }
