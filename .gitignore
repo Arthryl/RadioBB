@@ -17,3 +17,6 @@ __pycache__/
 
 # Local properties
 **/android/local.properties
+
+# Build artifacts
+Gotowa_Aplikacja_Android/
