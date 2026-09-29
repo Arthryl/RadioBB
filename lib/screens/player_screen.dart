@@ -538,87 +538,142 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
   }
 
   Widget _buildBottomActionRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        // Sleep Timer
-        StreamBuilder<int>(
-          stream: widget.audioHandler.sleepTimerStream,
-          initialData: widget.audioHandler.sleepSecondsRemaining,
-          builder: (context, snapshot) {
-            final sec = snapshot.data ?? 0;
-            final isActive = sec > 0;
-            final min = (sec / 60).ceil();
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppTheme.navyCard,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.navyCardLight, width: 1.2),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Row(
+          children: [
+            // 1. Sleep Timer (Expanded)
+            Expanded(
+              child: StreamBuilder<int>(
+                stream: widget.audioHandler.sleepTimerStream,
+                initialData: widget.audioHandler.sleepSecondsRemaining,
+                builder: (context, snapshot) {
+                  final sec = snapshot.data ?? 0;
+                  final isActive = sec > 0;
+                  final min = (sec / 60).ceil();
 
-            return OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: isActive ? AppTheme.amberAccent : AppTheme.textLight,
-                side: BorderSide(
-                  color: isActive ? AppTheme.amberAccent : AppTheme.navyCardLight,
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => SleepTimerSheet(audioHandler: widget.audioHandler),
+                        );
+                      },
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              isActive ? Icons.timer_rounded : Icons.bedtime_outlined,
+                              size: 16,
+                              color: isActive ? AppTheme.amberAccent : AppTheme.textLight,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                isActive ? '$min min' : 'Sleep',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isActive ? AppTheme.amberAccent : AppTheme.textLight,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Divider 1
+            Container(
+              width: 1,
+              height: 20,
+              color: AppTheme.navyCardLight,
+            ),
+
+            // 2. Stream Quality Badge (STEREO) (Expanded)
+            Expanded(
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.graphic_eq_rounded, size: 16, color: AppTheme.bluePrimary),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'STEREO',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.6,
+                          color: AppTheme.blueSoft,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               ),
-              icon: Icon(
-                isActive ? Icons.timer_rounded : Icons.bedtime_outlined,
-                size: 18,
-              ),
-              label: Text(
-                isActive ? '$min min' : 'Sleep',
-                style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w600),
-              ),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => SleepTimerSheet(audioHandler: widget.audioHandler),
-                );
-              },
-            );
-          },
-        ),
+            ),
 
-        // Stream Quality Badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.navyCard,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.navyCardLight),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.graphic_eq_rounded, size: 16, color: AppTheme.bluePrimary),
-              const SizedBox(width: 6),
-              Text(
-                '128 kbps · STEREO',
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.blueSoft,
+            // Divider 2
+            Container(
+              width: 1,
+              height: 20,
+              color: AppTheme.navyCardLight,
+            ),
+
+            // 3. Udostępnij (Expanded)
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _openShareDialog(context),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.share_rounded,
+                          size: 16,
+                          color: AppTheme.bluePrimary,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Udostępnij',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.paperWhite,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-
-        // Udostępnij
-        OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppTheme.textLight,
-            side: const BorderSide(color: AppTheme.navyCardLight),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          ),
-          icon: const Icon(Icons.share_outlined, size: 18),
-          label: Text(
-            'Udostępnij',
-            style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w600),
-          ),
-          onPressed: () => _openShareDialog(context),
-        ),
-      ],
+      ),
     );
   }
 
