@@ -87,7 +87,7 @@ class _NewsScreenState extends State<NewsScreen> {
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return Container(
-                    margin: const EdgeInsets.bottom: 16,
+                    margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppTheme.navyCard,
@@ -140,7 +140,7 @@ class _NewsScreenState extends State<NewsScreen> {
                                 ),
                                 child: Text(
                                   item.author.toUpperCase(),
-                                  style: GoogleFonts.jetbrainsMono(
+                                  style: GoogleFonts.jetBrainsMono(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
                                     color: AppTheme.blueSoft,

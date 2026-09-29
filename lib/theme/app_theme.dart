@@ -85,7 +85,7 @@ class AppTheme {
           fontWeight: FontWeight.w400,
           color: textLight,
         ),
-        labelLarge: GoogleFonts.jetbrainsMono(
+        labelLarge: GoogleFonts.jetBrainsMono(
           fontSize: 13,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,

@@ -151,7 +151,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       ),
                       Text(
                         isPlaying ? 'Nadaje na żywo' : 'Zatrzymano',
-                        style: GoogleFonts.jetbrainsMono(
+                        style: GoogleFonts.jetBrainsMono(
                           fontSize: 11,
                           color: isPlaying ? AppTheme.amberAccent : AppTheme.textMuted,
                           fontWeight: FontWeight.w600,

@@ -127,7 +127,7 @@ class ContactScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     Text(
                       'PREZENT SPECJALNY',
-                      style: GoogleFonts.jetbrainsMono(
+                      style: GoogleFonts.jetBrainsMono(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.0,
@@ -240,7 +240,7 @@ class ContactScreen extends StatelessWidget {
         ),
         Text(
           value,
-          style: GoogleFonts.jetbrainsMono(
+          style: GoogleFonts.jetBrainsMono(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             color: AppTheme.blueSoft,

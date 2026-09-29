@@ -68,7 +68,7 @@ class SleepTimerSheet extends StatelessWidget {
                     if (seconds > 0) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        margin: const EdgeInsets.bottom: 16,
+                        margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
                           color: AppTheme.navyCard,
                           borderRadius: BorderRadius.circular(14),
@@ -156,7 +156,7 @@ class SleepTimerSheet extends StatelessWidget {
       },
       child: Text(
         '$minutes min',
-        style: GoogleFonts.jetbrainsMono(
+        style: GoogleFonts.jetBrainsMono(
           fontSize: 15,
           fontWeight: FontWeight.w700,
         ),

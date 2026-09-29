@@ -58,7 +58,7 @@ class MediaGroupScreen extends StatelessWidget {
                         children: [
                           Text(
                             'RAZEM WIEMY WIĘCEJ',
-                            style: GoogleFonts.jetbrainsMono(
+                            style: GoogleFonts.jetBrainsMono(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: AppTheme.amberAccent,
@@ -94,7 +94,7 @@ class MediaGroupScreen extends StatelessWidget {
 
           Text(
             'NASZE MEDIA',
-            style: GoogleFonts.jetbrainsMono(
+            style: GoogleFonts.jetBrainsMono(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.0,
@@ -184,7 +184,7 @@ class MediaGroupScreen extends StatelessWidget {
                     ),
                     child: Text(
                       type,
-                      style: GoogleFonts.jetbrainsMono(
+                      style: GoogleFonts.jetBrainsMono(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.blueSoft,

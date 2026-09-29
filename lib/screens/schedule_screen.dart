@@ -73,7 +73,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       selected: isSelected,
                       selectedColor: AppTheme.bluePrimary,
                       backgroundColor: AppTheme.navyCard,
-                      labelStyle: GoogleFonts.jetbrainsMono(
+                      labelStyle: GoogleFonts.jetBrainsMono(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: isSelected ? AppTheme.paperWhite : AppTheme.textLight,
@@ -178,7 +178,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           ),
                           child: Text(
                             prog.time,
-                            style: GoogleFonts.jetbrainsMono(
+                            style: GoogleFonts.jetBrainsMono(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
                               color: isLiveNow ? AppTheme.amberAccent : AppTheme.blueSoft,
@@ -214,7 +214,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                       ),
                                       child: Text(
                                         'TERAZ',
-                                        style: GoogleFonts.jetbrainsMono(
+                                        style: GoogleFonts.jetBrainsMono(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w900,
                                           color: AppTheme.navyDark,

@@ -203,7 +203,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
               const SizedBox(width: 7),
               Text(
                 'NA ŻYWO',
-                style: GoogleFonts.jetbrainsMono(
+                style: GoogleFonts.jetBrainsMono(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.8,
@@ -274,7 +274,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                   children: [
                     Text(
                       'Radio BB Online',
-                      style: GoogleFonts.jetbrainsMono(
+                      style: GoogleFonts.jetBrainsMono(
                         fontSize: 11,
                         color: AppTheme.blueSoft,
                         fontWeight: FontWeight.w600,
@@ -311,14 +311,14 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
             if (currentProg != null) ...[
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                margin: const EdgeInsets.bottom: 6,
+                margin: const EdgeInsets.only(bottom: 6),
                 decoration: BoxDecoration(
                   color: AppTheme.navyCardLight,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'AUDYCJA: ${currentProg.title.toUpperCase()} (${currentProg.time})',
-                  style: GoogleFonts.jetbrainsMono(
+                  style: GoogleFonts.jetBrainsMono(
                     fontSize: 11,
                     color: AppTheme.amberAccent,
                     fontWeight: FontWeight.w700,
@@ -518,7 +518,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
               const SizedBox(width: 6),
               Text(
                 '128 kbps · STEREO',
-                style: GoogleFonts.jetbrainsMono(
+                style: GoogleFonts.jetBrainsMono(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.blueSoft,
