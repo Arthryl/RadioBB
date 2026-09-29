@@ -39,12 +39,12 @@ jobs:
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: RadioBB-v1.0.3-APK
+          name: RadioBB-v1.0.4-APK
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload Google Play AAB Bundle
         uses: actions/upload-artifact@v4
         with:
-          name: RadioBB-v1.0.3-AAB
+          name: RadioBB-v1.0.4-AAB
           path: build/app/outputs/bundle/release/app-release.aab
 
