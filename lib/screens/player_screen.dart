@@ -1,7 +1,9 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/radio_audio_handler.dart';
 import '../theme/app_theme.dart';
 import '../widgets/mountain_visualizer.dart';
@@ -53,12 +55,6 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
     });
   }
 
-  void _shareRadio() {
-    Share.share(
-      'Słucham Radia BB – Beskidzkie brzmienia na żywo! Dołącz do mnie: https://radiobb.pl',
-      subject: 'Radio BB – Posłuchaj na żywo!',
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -620,9 +616,212 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
             'Udostępnij',
             style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w600),
           ),
-          onPressed: _shareRadio,
+          onPressed: () => _openShareDialog(context),
         ),
       ],
+    );
+  }
+
+  void _openShareDialog(BuildContext context) {
+    final currentItem = widget.audioHandler.mediaItem.value;
+    final currentTitle = currentItem?.title ?? 'Radio BB';
+    final currentArtist = currentItem?.artist ?? 'Radio BB';
+    final hasArtist = currentArtist.isNotEmpty &&
+        currentArtist.toLowerCase() != 'radio bb' &&
+        currentArtist.toLowerCase() != 'beskidzkie brzmienia';
+
+    final shareMessage = hasArtist
+        ? 'Słucham "$currentTitle" – $currentArtist w Radiu BB! Posłuchaj na żywo: https://radiobb.pl'
+        : 'Słucham Radia BB – Beskidzkie brzmienia na żywo! Dołącz do mnie: https://radiobb.pl';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+        decoration: const BoxDecoration(
+          color: AppTheme.navyDark,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border(top: BorderSide(color: AppTheme.navyCardLight, width: 1.5)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 18),
+                decoration: BoxDecoration(
+                  color: AppTheme.navyCardLight,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.bluePrimary.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(Icons.share_rounded, color: AppTheme.bluePrimary, size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Udostępnij Radio BB',
+                          style: GoogleFonts.manrope(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.paperWhite,
+                          ),
+                        ),
+                        Text(
+                          hasArtist ? '$currentArtist – $currentTitle' : 'Beskidzkie brzmienia na żywo',
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            color: AppTheme.textMuted,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Opcja 1: Wyślij przez aplikacje
+              _buildShareTile(
+                icon: Icons.send_rounded,
+                title: 'Wyślij przez aplikacje',
+                subtitle: 'WhatsApp, Messenger, SMS, e-mail...',
+                color: AppTheme.bluePrimary,
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  try {
+                    final box = context.findRenderObject() as RenderBox?;
+                    final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+                    await Share.share(
+                      shareMessage,
+                      subject: 'Radio BB – Posłuchaj na żywo!',
+                      sharePositionOrigin: rect,
+                    );
+                  } catch (_) {
+                    await Clipboard.setData(ClipboardData(text: shareMessage));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Skopiowano link do schowka!'),
+                          backgroundColor: AppTheme.bluePrimary,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Opcja 2: Kopiuj link
+              _buildShareTile(
+                icon: Icons.copy_rounded,
+                title: 'Kopiuj link do radia',
+                subtitle: 'https://radiobb.pl',
+                color: AppTheme.amberAccent,
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  await Clipboard.setData(const ClipboardData(text: 'https://radiobb.pl'));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Skopiowano link https://radiobb.pl do schowka!'),
+                        backgroundColor: AppTheme.bluePrimary,
+                      ),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Opcja 3: Otwórz stronę radia
+              _buildShareTile(
+                icon: Icons.open_in_browser_rounded,
+                title: 'Otwórz stronę internetową',
+                subtitle: 'Portal www.radiobb.pl',
+                color: AppTheme.blueSoft,
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  try {
+                    await launchUrl(Uri.parse('https://radiobb.pl'), mode: LaunchMode.externalApplication);
+                  } catch (_) {}
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppTheme.navyCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.navyCardLight),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.paperWhite,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.manrope(
+                      fontSize: 11.5,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textMuted),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -177,7 +177,7 @@ class ContactScreen extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildTechRow('Wersja aplikacji', '1.0.1 (Aktualizacja z poprawkami)'),
+                _buildTechRow('Wersja aplikacji', '1.0.2 (Najnowsza aktualizacja)'),
                 const Divider(color: AppTheme.navyCardLight, height: 18),
                 _buildTechRow('Silnik audio', 'just_audio + audio_service'),
                 const Divider(color: AppTheme.navyCardLight, height: 18),
